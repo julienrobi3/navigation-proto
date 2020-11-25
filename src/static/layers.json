@@ -1,0 +1,79 @@
+{
+    "layers": [{
+            "type": "wms",
+            "url": "https://geo.weather.gc.ca/geomet?lang=fr&service=WMS&version=1.3.0&request=GetCapabilities&layer=RADAR_1KM_RSNO",
+            "title": {
+                "en": "LayerEN",
+                "fr": "Précipitation radar"
+            },
+            "visibleLayer": false,
+            "infoLegende": [
+                "Légende",
+                "<img src=\"https://geo.weather.gc.ca/geomet?lang=fr&version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=RADAR_1KM_RRAI&format=image/png&STYLE=RADARURPPRECIPR14-LINEAR\">"
+            ],
+            "name": "RADAR_1KM_RSNO",
+            "customParameters": "radar",
+            "opacity": 1,
+            "groupeParentName": "observations"
+        },
+        {
+            "type": "wms",
+            "url": "https://geo.weather.gc.ca/geomet?lang=fr&service=WMS&version=1.3.0&request=GetCapabilities&layer=RADAR_COVERAGE_RRAI.INV",
+            "title": {
+                "en": "LayerEN",
+                "fr": "Couverture Radar"
+            },
+            "visibleLayer": false,
+            "name": "RADAR_COVERAGE_RRAI.INV",
+            "customParameters": "radar",
+            "opacity": 1,
+            "groupeParentName": "observations"
+        },
+        {
+            "type": "wfs",
+            "url": "https://geoserver.preprod.ogsl.ca/geoserver/robitaillej/ogc/features/",
+            "collectionId": "robitaillej:test_create_shp",
+            "title": {
+                "en": "LayerEN",
+                "fr": "regions"
+            },
+            "visibleLayer": true,
+            "name": "layer_regions",
+            "renderer": {
+                "type": "simple",
+                "symbol": {
+                    "type": "simple-fill"
+                }
+            },
+            "opacity": 1
+        },
+        {
+            "type": "wms",
+            "url": "https://geo.weather.gc.ca/geomet?lang=fr&service=WMS&version=1.3.0&request=GetCapabilities&layer=RDPS.ETA_WSPD",
+            "title": {
+                "en": "LayerEN",
+                "fr": "Prévision des vent (m/s)"
+            },
+            "visibleLayer": false,
+            "infoLegende": "<img src=\"https://geo.weather.gc.ca/geomet?lang=fr&version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=RDPS.ETA_WSPD&format=image/png&STYLE=WINDSPEEDKNOTS-LINEAR\">",
+            "name": "RDPS.ETA_WSPD",
+            "opacity": 0.3,
+            "groupeParentName": "previsions"
+        }
+    ],
+    "groupes": [{
+            "name": "observations",
+            "title": {
+                "en": "GroupEn",
+                "fr": "Observations"
+            }
+        },
+        {
+            "name": "previsions",
+            "title": {
+                "en": "GroupEn",
+                "fr": "Prévisions"
+            }
+        }
+    ]
+}
