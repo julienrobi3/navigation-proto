@@ -154,6 +154,14 @@ function nearestTimeToShow(time, layerName) {
         );
 
         dateUTCClicked = getDateValuesFromDate(rounded);
+
+    } else if (timeInterval === "PT3H") {
+        coeff = 1000 * 60 * 60 * 3;
+        rounded = new Date(
+            Math.round(time.getTime() / coeff) * coeff
+        );
+
+        dateUTCClicked = getDateValuesFromDate(rounded);
     }
     return dateUTCClicked
 }
