@@ -74,7 +74,17 @@ export default {
         var timeChangeProxy = new Proxy(date, {
           set: function (target, property, value) {
             var dateChosen = value;
-            //console.log(value);
+
+
+            // To erase what it is said about the group of the previous time. 
+            console.log("layerList.visibleItems", layerList.visibleItems)
+            for (let i = 0; i< layerList.visibleItems.items.length; i++) {
+              if (layerList.visibleItems.items[i].layer.type === "group") {
+                layerList.visibleItems.items[i].panel = {}
+              }
+            }
+
+           
 
             var wmsLayers = map.allLayers.filter(function (layer) {
               return layer.type === "wms";
