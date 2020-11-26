@@ -123,7 +123,9 @@ export default {
 
                     console.log("layerView", thisView.whenLayerView(layer_wms)); // TODO Find out why when I have this line, the layers erase themselves properly when I am out of range, but it doesnt when I dont add this line
 
-                    updateGroupLayerList(groupArray[i].title);
+                    setTimeout(function () {
+                      updateGroupLayerList(groupArray[i].title);
+                    }, 1); // doit être retardé à cause de la asynchornicité !
                   }
                 }
               }
@@ -153,23 +155,7 @@ export default {
           zoom: 7,
         });
 
-        //Fonction permettant de mentionner quand, à une date choisie, il n'y a pas de couches pour le groupe s'il est visible.
-        function updateGroupLayerList(title) {
-          layerList.listItemCreatedFunction = function (event) {
-            var item = event.item;
-            if (item.title === title && item.layer.layers.items.length === 0) {
-              item.panel = {
-                content: "Aucune couche pour le temps sélectionné",
-                open: true,
-              };
-            } else {
-              item.panel = {};
-            }
-          };
-        }
-
         // Set up a way to store the visible attribute of every layers, so that it keeps the same value when changing time
-        //Stores layers and their visible states.
         var visibleLayers = {};
 
         //creates an array that will store all the layers of the map
@@ -177,11 +163,13 @@ export default {
           set: function (target, property, value) {
             //watch the visible property of all layers in the array. If changed, update the visibleLayers.
             for (let i = 0; i < currentLayersProxy.length; i++) {
-              watchUtils.watch(currentLayersProxy[i], "visible", function (
-                visible
-              ) {
-                visibleLayers[currentLayersProxy[i].name] = visible;
-              });
+              watchUtils.watch(
+                currentLayersProxy[i],
+                "visible",
+                function (visible) {
+                  visibleLayers[currentLayersProxy[i].name] = visible;
+                }
+              );
             }
             target[property] = value;
             return true;
@@ -223,6 +211,7 @@ export default {
           }
           return groupsArray;
         }
+
         //load wfs layers (from layers.json)
         for (let j = 0; j < dataJSON.layers.length; j++) {
           if (dataJSON.layers[j].type === "wfs") {
@@ -240,8 +229,10 @@ export default {
           }
         }
 
+        // Sometimes, using this.view doesnt work, so use thisView instead.
         var thisView = this.view;
-        // Creates the WMS layers  (from layers.json)once it is clicked in the layerlist
+
+        // Loads the WMS layers  (from layers.json) once it is clicked as visible in the layerlist
         for (let i = 0; i < groupArray.length; i++) {
           watchUtils.watch(groupArray[i], "visible", function (visible) {
             if (visible) {
@@ -277,8 +268,7 @@ export default {
                       dataJSON.layers[j].name
                     );
 
-
-                    // Supprime la couche si le temps n'est pas dans les bornes. Ridicule d'ajouter puis ensuite supprimer, mais il semble que ce soit la seule facon que ca fonctionne correctement (pour l'instant)! 
+                    // Supprime la couche si le temps n'est pas dans les bornes. Ridicule d'ajouter puis ensuite supprimer, mais il semble que ce soit la seule facon que ca fonctionne correctement (pour l'instant)!
                     if (
                       dateToShow < timeAvailable[0] ||
                       dateToShow > timeAvailable[1]
@@ -286,8 +276,9 @@ export default {
                       groupArray[i].remove(layer_wms);
                     }
 
-                    updateGroupLayerList(groupArray[i].title);
-                    //load wms radar layer
+                    setTimeout(function () {
+                      updateGroupLayerList(groupArray[i].title);
+                    }, 1); 
                   }
                 }
               }
@@ -320,7 +311,10 @@ export default {
               }
 
               thisView.goTo(response.results[0].graphic.geometry);
-              console.log("id", response.results[0].graphic.attributes.OBJECTID)
+              console.log(
+                "id",
+                response.results[0].graphic.attributes.OBJECTID
+              );
               getMeteo(response.results[0].graphic.attributes.OBJECTID);
 
               return geometry;
@@ -417,6 +411,15 @@ export default {
 
                 stationsLayerTrue.add(pointGraphicTrue);
               }
+
+              layerList.listItemCreatedFunction = function (event) {
+                var item = event.item;
+                if (item.title === "Stations") {
+                  item.panel = {
+                    content:"<p>Stations rouges: observations et prévisions</p><p>Stations vertes: observations seulement",
+                    open: true}
+                }
+              };
             }
           }
           //console.log("layer", stationsLayerTrue);
@@ -487,25 +490,37 @@ export default {
           ],
         };
 
-        //builds the layer list and the legends embedded in it
+        //builds the layerlist and the legends embedded in it
         const layerList = new LayerList({
           view: this.view,
           container: document.createElement("div"),
-          listItemCreatedFunction: function (event) {
-            // A voir pourquoi cette fonction est appellée pour toutes les couches et
-            // tous les groupes, et ce plusieurs fois.
-            const item = event.item;
+        });
+        layerList.container.style = "height: 100%";
+        let panelDiv = document.getElementById("layerlist");
+        panelDiv.appendChild(layerList.container);
+
+        //Fonction permettant entre autre de mentionner quand, à une date choisie, il n'y a pas de couches pour le groupe s'il est visible.
+        function updateGroupLayerList(title) {
+          layerList.listItemCreatedFunction = function (event) {
+            var item = event.item;
+            if (item.title === title) {
+              if (item.children.items.length === 0) {
+                item.panel = {
+                  content: "Aucune couche pour le temps sélectionné",
+                  open: true,
+                };
+              } else {
+                item.panel = { content: "" };
+              }
+            }
             if ("infoLegende" in item.layer) {
               item.panel = {
                 content: item.layer.infoLegende,
                 open: false,
               };
             }
-          },
-        });
-        layerList.container.style = "height: 100%";
-        let panelDiv = document.getElementById("layerlist");
-        panelDiv.appendChild(layerList.container);
+          };
+        }
 
         //TimeSlider
         var timeSlider = new TimeSlider({
@@ -547,6 +562,7 @@ export default {
         timeSlider.watch("values", function (values) {
           timeChangeProxy.dateChosen = values[0];
         });
+        // TODO Check why I cannot CSS the common parent tag of titleDate and Slider. If I dont CSS directly the slider tag, it doesnt appear at the right place.
         document.getElementById("titleDate").innerHTML = date.dateNow;
       }
     );
