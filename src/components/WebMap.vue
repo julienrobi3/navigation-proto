@@ -57,10 +57,10 @@ export default {
           this.dateChosen = new Date();
 
           this.dateMin = new Date();
-          this.dateMin.setHours(this.dateMin.getHours() - 12);
+          this.dateMin.setHours(this.dateMin.getHours() - 18);
 
           this.dateMax = new Date();
-          this.dateMax.setHours(this.dateMax.getHours() + 12);
+          this.dateMax.setHours(this.dateMax.getHours() + 18);
 
           this.datesArrayHours = dateRoundedArrayHours(
             this.dateMin,

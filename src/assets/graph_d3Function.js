@@ -11,12 +11,13 @@ function graph(data, element, timeNow, timeSlider) {
     var minValue = d3.min(data, (d) => d.value);
     var maxValue = d3.max(data, (d) => d.value);
 
-    // limits of the visible range on the graph
+    var varLimits = 6
+        // limits of the visible range on the graph
     var dateMin = new Date();
-    dateMin.setHours(dateMin.getHours() - 6);
+    dateMin.setHours(dateMin.getHours() - varLimits);
 
     var dateMax = new Date();
-    dateMax.setHours(dateMax.getHours() + 6);
+    dateMax.setHours(dateMax.getHours() + varLimits);
 
     // Max extent of the data
     var extentX = d3.extent(data, d => d.date)
@@ -220,35 +221,43 @@ function graph(data, element, timeNow, timeSlider) {
         dateMin.setTime(dateMin.getTime() + diff)
         dateMax.setTime(dateMax.getTime() + diff)
 
-        if (dateMin > extentX[0] && dateMax < extentX[1]) {
-            x.domain([dateMin, dateMax])
-            svg.select(".xaxis")
-                .call(xAxis)
-                .selectAll("text")
-                .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em")
-                .attr("transform", "rotate(-65)")
-                .style("font-size", 10)
-
-            svg.selectAll("path").remove()
-            svg.append("path")
-                .data([data])
-                .attr("class", "line")
-                .attr("d", line)
-                .style("stroke-width", 2)
-                .style("stroke", "blue")
-                .style("fill", "none");
-
-            svg
-                .append("path")
-                .data([todayLine])
-                .attr("class", "line")
-                .attr("d", line2)
-                .style("stroke-width", 2)
-                .style("stroke", "red")
-                .style("fill", "none");
+        if (dateMin < extentX[0]) {
+            dateMin = new Date(extentX[0])
+            dateMax.setHours(dateMin.getHours() + varLimits * 2)
         }
+        if (dateMax > extentX[1]) {
+            dateMax = new Date(extentX[1])
+            dateMin.setHours(dateMax.getHours() - varLimits * 2)
+        }
+
+        x.domain([dateMin, dateMax])
+        svg.select(".xaxis")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)")
+            .style("font-size", 10)
+
+        svg.selectAll("path").remove()
+        svg.append("path")
+            .data([data])
+            .attr("class", "line")
+            .attr("d", line)
+            .style("stroke-width", 2)
+            .style("stroke", "blue")
+            .style("fill", "none");
+
+        svg
+            .append("path")
+            .data([todayLine])
+            .attr("class", "line")
+            .attr("d", line2)
+            .style("stroke-width", 2)
+            .style("stroke", "red")
+            .style("fill", "none");
+
 
 
     }
